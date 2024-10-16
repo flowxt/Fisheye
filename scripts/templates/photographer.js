@@ -1,29 +1,35 @@
 function photographerTemplate(data) {
-  // fonction appelé qui prend en parametre le data
-  const { name, portrait, city, country, tagline, price } = data; // Extraction des données
-  const picture = `assets/images/Portrait/${portrait}`; // Chemin des portraits
+  const { id, name, portrait, city, country, tagline, price } = data;
+  const picture = `assets/images/Portrait/${portrait}`; // Chemin vers l'image du portrait
 
   function getUserCardDOM() {
-    const article = document.createElement("article"); // Crée un élément article qui va contenir tous les éléments de la carte
+    const article = document.createElement("article");
+
+    // Créer le lien autour de l'image
+    const link = document.createElement("a");
+    link.setAttribute("href", `photographer.html?id=${id}`); // Lien vers la page du photographe
+    link.setAttribute("aria-label", `Voir la page de ${name}`);
 
     const img = document.createElement("img");
-    img.setAttribute("src", picture); // Affiche le portrait
-    img.setAttribute("alt", `${name}`); // Affiche le alt avec le nom du photographe
+    img.setAttribute("src", picture); // Assurez-vous que le chemin de l'image est correct
+    img.setAttribute("alt", name);
 
-    const h2 = document.createElement("h2"); // Crée un élément h2 qui va contenir le nom du photographe
+    link.appendChild(img); // L'image devient le contenu du lien
+
+    const h2 = document.createElement("h2");
     h2.textContent = name;
 
-    const location = document.createElement("h3"); // Crée un élément h3 qui va contenir la ville et le pays
+    const location = document.createElement("h3");
     location.textContent = `${city}, ${country}`;
 
-    const taglineElement = document.createElement("p"); // Crée un élément p qui va contenir le tagline
+    const taglineElement = document.createElement("p");
     taglineElement.textContent = tagline;
 
     const priceElement = document.createElement("p");
-    priceElement.textContent = `${price}€/jour`; // Affiche le prix par jour
+    priceElement.textContent = `${price}€/jour`;
 
-    // Ici tous les éléments sont ajoutés à l'élément article
-    article.appendChild(img);
+    // Ajouter les éléments dans l'article
+    article.appendChild(link); // Lien contenant l'image
     article.appendChild(h2);
     article.appendChild(location);
     article.appendChild(taglineElement);
@@ -32,5 +38,5 @@ function photographerTemplate(data) {
     return article;
   }
 
-  return { getUserCardDOM }; // Retourne la fonction qui crée la carte
+  return { getUserCardDOM };
 }
