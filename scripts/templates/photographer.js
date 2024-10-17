@@ -38,5 +38,32 @@ function photographerTemplate(data) {
     return article;
   }
 
-  return { getUserCardDOM };
+  function getHeaderDOM() {
+    const headerDiv = document.createElement("div");
+    headerDiv.classList.add("photographer-header-info");
+
+    const img = document.createElement("img");
+    img.setAttribute("src", picture);
+    img.setAttribute("alt", name);
+    img.classList.add("photographer-portrait"); // Ajout d'une classe pour le style
+
+    const nameElement = document.createElement("h1");
+    nameElement.textContent = name;
+
+    const locationElement = document.createElement("h2");
+    locationElement.textContent = `${city}, ${country}`;
+
+    const taglineElement = document.createElement("p");
+    taglineElement.textContent = tagline;
+
+    // Ajouter tous les éléments dans headerDiv
+    headerDiv.appendChild(nameElement);
+    headerDiv.appendChild(locationElement);
+    headerDiv.appendChild(taglineElement);
+    headerDiv.appendChild(img); // La photo à la fin
+
+    return headerDiv;
+  }
+
+  return { getUserCardDOM, getHeaderDOM };
 }

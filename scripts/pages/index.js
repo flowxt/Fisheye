@@ -12,6 +12,7 @@ function genererPhotographes(photographers) {
 
   photographers.forEach((photographerData) => {
     const photographerModel = photographerTemplate(photographerData); // Utilise le template
+
     const userCardDOM = photographerModel.getUserCardDOM(); // Crée la carte
     sectionPhotographer.appendChild(userCardDOM); // Ajoute la carte à la section
   });
