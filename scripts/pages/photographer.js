@@ -72,18 +72,26 @@ async function displayPhotographerInfo(photographerId) {
 // Fonction pour afficher les médias du photographe
 async function displayPhotographerMedia(photographerId) {
   const { media } = await getPhotographersData();
-
-  // Filtrer les médias du photographe
   const photographerMedia = media.filter(
     (item) => item.photographerId === photographerId
   );
 
   const mediaSection = document.getElementById("media-section");
 
-  // Boucle pour afficher chaque média
-  photographerMedia.forEach((item) => {
+  // Prépare les images pour la Lightbox
+  setupLightbox(photographerMedia);
+
+  photographerMedia.forEach((item, index) => {
     const mediaItem = mediaFactory(item);
-    mediaSection.appendChild(mediaItem.getMediaDOM());
+    const mediaElement = mediaItem.getMediaDOM();
+
+    // Ajoute un gestionnaire d'événements pour ouvrir la Lightbox
+    mediaElement.querySelector("img, video").addEventListener("click", () => {
+      console.log("Média cliqué", item); // Vérifie que l'élément est bien cliqué
+      openLightbox(index);
+    });
+
+    mediaSection.appendChild(mediaElement);
   });
 }
 
@@ -113,7 +121,7 @@ function mediaFactory(data) {
         "src",
         `assets/images/${photographerName}/${video}`
       );
-      videoElement.setAttribute("controls", "controls");
+      // videoElement.setAttribute("controls", "controls");
       mediaElement.appendChild(videoElement);
     }
 
