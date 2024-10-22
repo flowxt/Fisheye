@@ -121,21 +121,86 @@ function mediaFactory(data) {
         "src",
         `assets/images/${photographerName}/${video}`
       );
-      // videoElement.setAttribute("controls", "controls");
       mediaElement.appendChild(videoElement);
     }
+
+    // Titre à gauche et likes + coeur à droite
+    const mediaInfo = document.createElement("div");
+    mediaInfo.classList.add("media-info");
 
     const titleElement = document.createElement("h3");
     titleElement.textContent = title;
 
-    const likesElement = document.createElement("p");
-    likesElement.textContent = `${likes} likes`;
+    const likesContainer = document.createElement("div");
+    likesContainer.classList.add("likes-container");
 
-    mediaElement.appendChild(titleElement);
-    mediaElement.appendChild(likesElement);
+    const likesElement = document.createElement("p");
+    likesElement.textContent = likes;
+    likesElement.classList.add("like-number");
+
+    const heartIcon = document.createElement("i");
+    heartIcon.classList.add("fas", "fa-heart", "red-heart"); // Ajoute red-heart pour la couleur
+    heartIcon.setAttribute("aria-label", "likes");
+
+    let liked = false; // Variable pour savoir si la photo a déjà été likée
+
+    // Gestion du clic pour liker
+    heartIcon.addEventListener("click", () => {
+      if (!liked) {
+        // Si la photo n'a pas encore été likée
+        let currentLikes = parseInt(likesElement.textContent);
+        likesElement.textContent = currentLikes + 1;
+        totalLikes++; // Incrémenter le total des likes
+        updateTotalLikes(); // Mettre à jour l'encart des likes
+        liked = true; // Empêcher un second clic
+      }
+    });
+
+    likesContainer.appendChild(likesElement);
+    likesContainer.appendChild(heartIcon);
+
+    mediaInfo.appendChild(titleElement);
+    mediaInfo.appendChild(likesContainer);
+    mediaElement.appendChild(mediaInfo);
 
     return mediaElement;
   }
 
   return { getMediaDOM };
 }
+
+// Fonction pour calculer et afficher les likes totaux et le prix/jour
+function calculateTotalLikes(photographerId) {
+  getPhotographersData().then((data) => {
+    const { photographers, media } = data;
+
+    // Trouver le photographe correspondant à l'ID
+    const photographer = photographers.find((p) => p.id === photographerId);
+
+    // Filtrer les médias correspondant au photographe
+    const photographerMedia = media.filter(
+      (item) => item.photographerId === photographerId
+    );
+
+    // Calculer le nombre total de likes pour ce photographe
+    const totalLikes = photographerMedia.reduce(
+      (acc, item) => acc + item.likes,
+      0
+    );
+
+    // Récupérer le prix du photographe
+    const pricePerDay = photographer.price;
+
+    // Mettre à jour l'encadré en bas de page avec les likes et le prix
+    const likesContainer = document.querySelector(".photographer-likes");
+    likesContainer.innerHTML = `
+      <span>${totalLikes} <i class="fas fa-heart black-heart"></i></span>
+      <span>${pricePerDay}€ / jour</span>
+    `;
+  });
+}
+
+// Appel de la fonction pour calculer les likes et afficher le prix
+document.addEventListener("DOMContentLoaded", function () {
+  calculateTotalLikes(photographerId); // Assurez-vous que photographerId est bien défini
+});

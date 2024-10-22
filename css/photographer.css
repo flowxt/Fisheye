@@ -125,14 +125,35 @@ form textarea {
 width: 350px;
 height: 300px;
 object-fit: cover;
+border-radius: 10px;
 }
 
 .media-item video{
 width: 350px;
 height: 300px;
 object-fit: cover;
+border-radius: 10px;
 }
 
+.media-info{
+  display: flex;
+  justify-content: space-between;
+  max-width: 350px;
+  color: #901C1C;
+}
+
+.media-info h3 {
+  margin-top: 16px;
+}
+.likes-container{
+display: flex;
+color: #901C1C;
+}
+.fa-heart{
+  margin-top: 18px;
+  margin-left: 5px;
+  color: #901C1C;
+}
 
 nav{
     margin: 20px 100px ;
@@ -251,3 +272,30 @@ cursor: pointer;
     padding: 5px; /* Espacement intérieur */
     border-radius: 5px; /* Coins arrondis */
   }
+
+  .photographer-likes {
+    position: fixed;
+    bottom: 0;
+    right: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #DB8876;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    display: flex; /* Ajoute flexbox */
+  justify-content: space-between; /* Espace les éléments aux extrémités */
+  align-items: center; /* Aligne les éléments verticalement au centre */
+   
+  }
+
+  .photographer-likes .black-heart {
+    color: black; /* Définit la couleur du cœur en noir dans l'encart */
+  }
+  
+span{
+  font-size: 2rem;
+  font-weight: 900;
+  
+}
