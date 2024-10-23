@@ -1,3 +1,6 @@
+let totalLikes = 0;
+let currentSortBy = "popularite"; // État pour suivre le tri actuel
+// Liste des photographes avec leurs identifiants pour gérer les chemins des images
 const photographerNames = {
   243: "Mimi",
   930: "Ellie Rose",
@@ -7,22 +10,23 @@ const photographerNames = {
   195: "Marcel",
 };
 
-// Fonction pour récupérer les données des photographes et des médias
+// Fonction qui récupère les données des photographes depuis le fichier JSON
 async function getPhotographersData() {
   const response = await fetch("./data/photographers.json");
   const data = await response.json();
   return data;
 }
 
-// Récupérer l'ID du photographe à partir de l'URL
+// Récupération de l'identifiant du photographe depuis l'URL
 const urlParams = new URLSearchParams(window.location.search);
 const photographerId = parseInt(urlParams.get("id"), 10);
 
-// Template pour le photographe
+// Template pour structurer les informations du photographe
 function photographerTemplate(data) {
-  const { id, name, portrait, city, country, tagline } = data;
-  const picture = `assets/images/Portrait/${portrait}`; // Chemin vers l'image du portrait
+  const { name, portrait, city, country, tagline } = data;
+  const picture = `assets/images/Portrait/${portrait}`;
 
+  // Fonction qui génère le DOM (HTML) pour l'en-tête du photographe
   function getHeaderDOM() {
     const headerDiv = document.createElement("div");
     headerDiv.classList.add("photographer-header-info");
@@ -30,6 +34,9 @@ function photographerTemplate(data) {
     const img = document.createElement("img");
     img.setAttribute("src", picture);
     img.setAttribute("alt", name);
+
+    const detailsDiv = document.createElement("div");
+    detailsDiv.classList.add("photographer-details");
 
     const nameElement = document.createElement("h1");
     nameElement.textContent = name;
@@ -40,11 +47,10 @@ function photographerTemplate(data) {
     const taglineElement = document.createElement("p");
     taglineElement.textContent = tagline;
 
-    // Ajouter tous les éléments dans headerDiv
-    headerDiv.appendChild(img);
-    headerDiv.appendChild(nameElement);
-    headerDiv.appendChild(locationElement);
-    headerDiv.appendChild(taglineElement);
+    // Ajoute les éléments dans la structure
+    detailsDiv.append(nameElement, locationElement, taglineElement); // Utilisation de append pour simplifier
+
+    headerDiv.append(img, detailsDiv); // Utilisation de append pour simplifier
 
     return headerDiv;
   }
@@ -52,79 +58,90 @@ function photographerTemplate(data) {
   return { getHeaderDOM };
 }
 
-// Fonction pour afficher les informations du photographe
+// Fonction qui affiche les informations du photographe dans l'en-tête
 async function displayPhotographerInfo(photographerId) {
   const { photographers } = await getPhotographersData();
-
-  // Trouver le photographe avec l'ID correspondant
   const photographer = photographers.find((p) => p.id === photographerId);
 
   if (photographer) {
     const photographerModel = photographerTemplate(photographer);
-    const headerDOM = photographerModel.getHeaderDOM(); // Utiliser getHeaderDOM ici
+    const headerDOM = photographerModel.getHeaderDOM();
     const photographHeader = document.querySelector(".photograph-header");
+    photographHeader.appendChild(headerDOM);
+  }
+}
 
-    // Insérer le contenu de l'en-tête
-    photographHeader.appendChild(headerDOM); // Ajouter l'en-tête à la div photograph-header
+// Fonction pour trier les médias
+function sortMedia(media, sortBy) {
+  switch (sortBy) {
+    case "popularite":
+      return media.sort((a, b) => b.likes - a.likes); // Tri par nombre de likes (du plus grand au plus petit)
+    case "date":
+      return media.sort((a, b) => new Date(b.date) - new Date(a.date)); // Tri par date (du plus récent au plus ancien)
+    case "titre":
+      return media.sort((a, b) => a.title.localeCompare(b.title)); // Tri par titre (alphabétiquement)
+    default:
+      return media;
   }
 }
 
 // Fonction pour afficher les médias du photographe
-async function displayPhotographerMedia(photographerId) {
+async function displayPhotographerMedia(photographerId, sortBy = "popularite") {
   const { media } = await getPhotographersData();
   const photographerMedia = media.filter(
     (item) => item.photographerId === photographerId
   );
 
+  // Tri des médias en fonction de l'option sélectionnée
+  const sortedMedia = sortMedia(photographerMedia, sortBy);
+
   const mediaSection = document.getElementById("media-section");
+  mediaSection.innerHTML = ""; // Effacer les médias précédents
 
-  // Prépare les images pour la Lightbox
-  setupLightbox(photographerMedia);
+  setupLightbox(sortedMedia); // Initialisation de la lightbox
 
-  photographerMedia.forEach((item, index) => {
+  // Boucle pour créer chaque média et ajouter les événements de clic
+  sortedMedia.forEach((item, index) => {
     const mediaItem = mediaFactory(item);
     const mediaElement = mediaItem.getMediaDOM();
 
-    // Ajoute un gestionnaire d'événements pour ouvrir la Lightbox
-    mediaElement.querySelector("img, video").addEventListener("click", () => {
-      console.log("Média cliqué", item); // Vérifie que l'élément est bien cliqué
-      openLightbox(index);
-    });
-
-    mediaSection.appendChild(mediaElement);
+    // Ajoute un événement de clic pour ouvrir la Lightbox sur l'image ou la vidéo
+    mediaElement
+      .querySelector("img, video")
+      .addEventListener("click", () => openLightbox(index));
+    mediaSection.appendChild(mediaElement); // Ajoute le média à la section
   });
 }
 
-// Appel des fonctions pour afficher le photographe et ses médias
-displayPhotographerInfo(photographerId); // Affiche les infos du photographe
-displayPhotographerMedia(photographerId); // Affiche les médias du photographe
-
-// Factory pour gérer les médias
+// -----------------------------------------------------------------------------------
+// Factory pour générer la structure HTML pour chaque média (image ou vidéo)
+// -----------------------------------------------------------------------------------
 function mediaFactory(data) {
   const { title, image, video, likes } = data;
+  let isLiked = false; // Variable pour suivre si l'utilisateur a liké
 
+  // Fonction qui génère le DOM pour un média
   function getMediaDOM() {
     const mediaElement = document.createElement("div");
     mediaElement.classList.add("media-item");
 
-    // Afficher une image ou une vidéo selon les données
+    const photographerName = photographerNames[photographerId];
+    const mediaSrc = image
+      ? `assets/images/${photographerName}/${image}`
+      : `assets/images/${photographerName}/${video}`;
+
+    // Crée l'élément média (image ou vidéo)
     if (image) {
-      const photographerName = photographerNames[photographerId];
       const img = document.createElement("img");
-      img.setAttribute("src", `assets/images/${photographerName}/${image}`);
+      img.setAttribute("src", mediaSrc);
       img.setAttribute("alt", title);
       mediaElement.appendChild(img);
     } else if (video) {
-      const photographerName = photographerNames[photographerId];
       const videoElement = document.createElement("video");
-      videoElement.setAttribute(
-        "src",
-        `assets/images/${photographerName}/${video}`
-      );
+      videoElement.setAttribute("src", mediaSrc);
       mediaElement.appendChild(videoElement);
     }
 
-    // Titre à gauche et likes + coeur à droite
     const mediaInfo = document.createElement("div");
     mediaInfo.classList.add("media-info");
 
@@ -139,28 +156,21 @@ function mediaFactory(data) {
     likesElement.classList.add("like-number");
 
     const heartIcon = document.createElement("i");
-    heartIcon.classList.add("fas", "fa-heart", "red-heart"); // Ajoute red-heart pour la couleur
+    heartIcon.classList.add("fas", "fa-heart");
     heartIcon.setAttribute("aria-label", "likes");
 
-    let liked = false; // Variable pour savoir si la photo a déjà été likée
-
-    // Gestion du clic pour liker
+    // Gère l'événement de clic pour liker ou unliker un média
     heartIcon.addEventListener("click", () => {
-      if (!liked) {
-        // Si la photo n'a pas encore été likée
-        let currentLikes = parseInt(likesElement.textContent);
-        likesElement.textContent = currentLikes + 1;
-        totalLikes++; // Incrémenter le total des likes
-        updateTotalLikes(); // Mettre à jour l'encart des likes
-        liked = true; // Empêcher un second clic
-      }
+      const currentLikes = parseInt(likesElement.textContent);
+      likesElement.textContent = isLiked ? currentLikes - 1 : currentLikes + 1;
+      isLiked = !isLiked; // Inverse l'état
+      heartIcon.classList.toggle("liked", isLiked); // Ajoute ou enlève la classe liked
+      updateTotalLikes(isLiked ? 1 : -1); // Met à jour le total des likes
     });
 
-    likesContainer.appendChild(likesElement);
-    likesContainer.appendChild(heartIcon);
-
-    mediaInfo.appendChild(titleElement);
-    mediaInfo.appendChild(likesContainer);
+    // Ajoute le nombre de likes et l'icône cœur à la structure
+    likesContainer.append(likesElement, heartIcon); // Utilisation de append pour simplifier
+    mediaInfo.append(titleElement, likesContainer); // Utilisation de append pour simplifier
     mediaElement.appendChild(mediaInfo);
 
     return mediaElement;
@@ -169,38 +179,87 @@ function mediaFactory(data) {
   return { getMediaDOM };
 }
 
-// Fonction pour calculer et afficher les likes totaux et le prix/jour
-function calculateTotalLikes(photographerId) {
-  getPhotographersData().then((data) => {
-    const { photographers, media } = data;
-
-    // Trouver le photographe correspondant à l'ID
-    const photographer = photographers.find((p) => p.id === photographerId);
-
-    // Filtrer les médias correspondant au photographe
-    const photographerMedia = media.filter(
-      (item) => item.photographerId === photographerId
-    );
-
-    // Calculer le nombre total de likes pour ce photographe
-    const totalLikes = photographerMedia.reduce(
-      (acc, item) => acc + item.likes,
-      0
-    );
-
-    // Récupérer le prix du photographe
-    const pricePerDay = photographer.price;
-
-    // Mettre à jour l'encadré en bas de page avec les likes et le prix
-    const likesContainer = document.querySelector(".photographer-likes");
-    likesContainer.innerHTML = `
-      <span>${totalLikes} <i class="fas fa-heart black-heart"></i></span>
-      <span>${pricePerDay}€ / jour</span>
-    `;
-  });
+// Met à jour le compteur de likes total en bas de page
+function updateTotalLikes(change) {
+  totalLikes += change;
+  const likesContainer = document.querySelector(".photographer-likes");
+  likesContainer.querySelector(
+    "span"
+  ).innerHTML = `${totalLikes} <i class="fas fa-heart black-heart"></i>`;
 }
 
-// Appel de la fonction pour calculer les likes et afficher le prix
-document.addEventListener("DOMContentLoaded", function () {
-  calculateTotalLikes(photographerId); // Assurez-vous que photographerId est bien défini
+// Calcule le nombre total de likes pour tous les médias du photographe
+async function calculateTotalLikes(photographerId) {
+  const { photographers, media } = await getPhotographersData();
+  const photographer = photographers.find((p) => p.id === photographerId);
+  const photographerMedia = media.filter(
+    (item) => item.photographerId === photographerId
+  );
+
+  // Calcule la somme des likes pour tous les médias
+  totalLikes = photographerMedia.reduce((acc, item) => acc + item.likes, 0);
+  const pricePerDay = photographer.price;
+
+  // Met à jour l'encart avec le nombre total de likes et le prix du photographe
+  const likesContainer = document.querySelector(".photographer-likes");
+  likesContainer.innerHTML = `
+    <span>${totalLikes} <i class="fas fa-heart black-heart"></i></span>
+    <span>${pricePerDay}€ / jour</span>
+  `;
+}
+
+// Au chargement de la page, affiche les informations et les médias du photographe
+document.addEventListener("DOMContentLoaded", () => {
+  displayPhotographerInfo(photographerId);
+  displayPhotographerMedia(photographerId, "popularite"); // Tri par défaut
+  calculateTotalLikes(photographerId);
+});
+
+// Gérer le tri
+const sortButton = document.getElementById("sortButton");
+const sortOptions = document.getElementById("sortOptions");
+const arrowIcon = document.getElementById("arrowIcon");
+
+// Gère l'ouverture/fermeture du menu de tri et l'icône de la flèche
+sortButton.addEventListener("click", (event) => {
+  sortOptions.classList.toggle("show");
+
+  // Change l'icône en fonction de l'état du menu
+  arrowIcon.classList.toggle(
+    "fa-chevron-up",
+    sortOptions.classList.contains("show")
+  );
+  arrowIcon.classList.toggle(
+    "fa-chevron-down",
+    !sortOptions.classList.contains("show")
+  );
+
+  event.stopPropagation(); // Empêche l'événement de remonter dans la hiérarchie
+});
+
+// Gère le changement d'option de tri lorsque l'utilisateur clique sur une option
+document.querySelectorAll(".sort-option").forEach((option) => {
+  option.addEventListener("click", function () {
+    const newSortBy = this.getAttribute("data-sort");
+
+    // Mettez à jour l'état du tri actuel
+    currentSortBy = newSortBy;
+
+    const oldText = sortButton.textContent.trim();
+    sortButton.firstChild.nodeValue = this.textContent;
+    this.textContent = oldText;
+    sortOptions.classList.remove("show");
+    arrowIcon.classList.remove("fa-chevron-up");
+    arrowIcon.classList.add("fa-chevron-down");
+
+    // Afficher les médias triés selon l'option sélectionnée
+    displayPhotographerMedia(photographerId, currentSortBy);
+  });
+});
+
+// Gérer le clic en dehors du menu de tri pour le fermer
+document.addEventListener("click", () => {
+  sortOptions.classList.remove("show");
+  arrowIcon.classList.remove("fa-chevron-up");
+  arrowIcon.classList.add("fa-chevron-down");
 });

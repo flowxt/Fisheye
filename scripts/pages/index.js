@@ -1,9 +1,24 @@
-// Récupère les données depuis le fichier JSON
+// Fonction utilitaire pour créer des éléments DOM
+function createElement(tag, attributes = {}, textContent = "") {
+  const element = document.createElement(tag);
+  for (const key in attributes) {
+    element.setAttribute(key, attributes[key]);
+  }
+  if (textContent) {
+    element.textContent = textContent;
+  }
+  return element;
+}
+
+// Récupère les données depuis le fichier JSON (optimisé pour un seul appel)
+let photographersData = null;
 async function getPhotographers() {
-  const response = await fetch("./data/photographers.json"); // Ici on recupère les données du fichier JSON
-  const data = await response.json();
-  const photographers = data.photographers;
-  return photographers; // Retourne uniquement les photographes
+  if (!photographersData) {
+    const response = await fetch("./data/photographers.json");
+    const data = await response.json();
+    photographersData = data.photographers;
+  }
+  return photographersData;
 }
 
 // Génére les cartes des photographes en utilisant le template
@@ -12,7 +27,6 @@ function genererPhotographes(photographers) {
 
   photographers.forEach((photographerData) => {
     const photographerModel = photographerTemplate(photographerData); // Utilise le template
-
     const userCardDOM = photographerModel.getUserCardDOM(); // Crée la carte
     sectionPhotographer.appendChild(userCardDOM); // Ajoute la carte à la section
   });

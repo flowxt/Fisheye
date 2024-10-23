@@ -30,12 +30,27 @@
         </button>
       </div>
       <nav>
-        <p class="tri">Trier par :</p>
-        <select>
-          <option class="popularite">Popularité</option>
-          <option value="date">Date</option>
-          <option value="titre">Titre</option>
-        </select>
+        <div class="sort-container">
+          <p class="tri">Trier par :</p>
+          <div class="dropdown">
+            <button id="sortButton" class="submit_button">
+              Popularité
+              <i
+                id="arrowIcon"
+                class="fas fa-chevron-down"
+                style="margin-left: 8px"
+              ></i>
+            </button>
+            <div id="sortOptions" class="dropdown-content">
+              <button class="submit_button sort-option" data-sort="date">
+                Date
+              </button>
+              <button class="submit_button sort-option" data-sort="titre">
+                Titre
+              </button>
+            </div>
+          </div>
+        </div>
       </nav>
       <section id="media-section">
         <!-- Ce sera pour afficher les medias  -->
@@ -76,7 +91,7 @@
             <textarea id="message" aria-required="true"></textarea>
             <span class="error-message" id="message-error"></span>
           </div>
-          <button type="submit" class="contact_button">Envoyer</button>
+          <button type="submit" class="submit_button">Envoyer</button>
         </form>
       </div>
     </div>
@@ -87,13 +102,7 @@
       aria-labelledby="lightbox-title"
       aria-hidden="true"
     >
-      <button
-        class="close-button"
-        aria-label="Fermer la Lightbox"
-        onclick="closeLightbox()"
-      >
-        ✖
-      </button>
+      <i class="fas fa-times close-lightbox" onclick="closeLightbox()"></i>
       <div class="lightbox-content">
         <img id="lightbox-image" src="" alt="" />
         <video id="lightbox-video" controls style="display: none"></video>
