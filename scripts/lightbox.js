@@ -64,4 +64,4 @@ function setupLightbox(media) {
   console.log("Chemins des médias :", mediaItems); // Vérifie que les chemins sont corrects
 }
 
-// Assurez-vous d'appeler setupLightbox(media) lors de l'affichage des médias
+//faut que je m'assure d'appeler setupLightbox(media) lors de l'affichage des médias

@@ -73,20 +73,44 @@ async function displayPhotographerInfo(photographerId) {
 
 // Fonction pour trier les médias
 function sortMedia(media, sortBy) {
+  console.log(`Tri des médias par : ${sortBy}`);
+  console.log(
+    "Médias avant le tri :",
+    media.map((m) => ({ title: m.title, likes: m.likes, date: m.date }))
+  );
+
+  // Crée une copie du tableau des médias
+  const mediaCopy = media.slice();
+
+  let sortedMedia;
   switch (sortBy) {
     case "popularite":
-      return media.sort((a, b) => b.likes - a.likes); // Tri par nombre de likes (du plus grand au plus petit)
+      sortedMedia = mediaCopy.sort((a, b) => b.likes - a.likes); // Tri par nombre de likes (du plus grand au plus petit)
+      break;
     case "date":
-      return media.sort((a, b) => new Date(b.date) - new Date(a.date)); // Tri par date (du plus récent au plus ancien)
+      sortedMedia = mediaCopy.sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      ); // Tri par date (du plus récent au plus ancien)
+      break;
     case "titre":
-      return media.sort((a, b) => a.title.localeCompare(b.title)); // Tri par titre (alphabétiquement)
+      sortedMedia = mediaCopy.sort((a, b) => a.title.localeCompare(b.title)); // Tri par titre (alphabétiquement)
+      break;
     default:
-      return media;
+      sortedMedia = mediaCopy;
   }
+
+  console.log(
+    "Médias après le tri :",
+    sortedMedia.map((m) => ({ title: m.title, likes: m.likes, date: m.date }))
+  );
+  return sortedMedia;
 }
 
 // Fonction pour afficher les médias du photographe
 async function displayPhotographerMedia(photographerId, sortBy = "popularite") {
+  console.log(
+    `Affichage des médias pour le photographe ${photographerId} triés par ${sortBy}`
+  );
   const { media } = await getPhotographersData();
   const photographerMedia = media.filter(
     (item) => item.photographerId === photographerId
@@ -124,6 +148,7 @@ function mediaFactory(data) {
   function getMediaDOM() {
     const mediaElement = document.createElement("div");
     mediaElement.classList.add("media-item");
+    mediaElement.setAttribute("tabindex", "0"); // Rendre l'élément focusable
 
     const photographerName = photographerNames[photographerId];
     const mediaSrc = image
@@ -244,6 +269,7 @@ document.querySelectorAll(".sort-option").forEach((option) => {
 
     // Mettez à jour l'état du tri actuel
     currentSortBy = newSortBy;
+    console.log(`Option de tri sélectionnée : ${currentSortBy}`);
 
     const oldText = sortButton.textContent.trim();
     sortButton.firstChild.nodeValue = this.textContent;
