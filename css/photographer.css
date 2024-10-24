@@ -213,7 +213,7 @@ cursor: pointer;
     top: 50%; /* Centre verticalement */
     left: 50%; /* Centre horizontalement */
     width: 1240px; /* Largeur de la Lightbox */
-    height: 950px; /* Hauteur de la Lightbox */
+    height: 850px; /* Hauteur de la Lightbox */
     background-color: rgba(249, 248, 248, 1); /* Couleur de fond semi-transparente */
     transform: translate(-50%, -50%); /* Centrage complet */
     justify-content: center; /* Centre le contenu */
@@ -230,14 +230,14 @@ cursor: pointer;
   .lightbox-content {
     position: relative;
     width: 1050px; /* Largeur maximale pour les médias */
-    height: 850px; /* Hauteur maximale pour les médias */
+    height: 750px; /* Hauteur maximale pour les médias */
     overflow: hidden; /* Cache tout débordement */
     color: #901C1C;
   }
   
   #lightbox-image, #lightbox-video {
     width: 1050px; /* Largeur fixe de l'image ou de la vidéo */
-    height: 800px; /* Hauteur fixe de l'image ou de la vidéo */
+    height: 700px; /* Hauteur fixe de l'image ou de la vidéo */
     display: block; /* Assure que l'élément est un bloc */
     margin: auto; /* Centre l'image ou la vidéo */
     object-fit: cover; /* S'assure que l'image/remplissage s'adapte correctement */
