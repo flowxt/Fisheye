@@ -2,6 +2,7 @@
 <html>
   <head>
     <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="./css/photographer.css" rel="stylesheet" type="text/css" />
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link
@@ -31,9 +32,9 @@
       </div>
       <nav>
         <div class="sort-container">
-          <p class="tri">Trier par :</p>
+          <p class="tri" class="tri">Trier par :</p>
           <div class="dropdown">
-            <button id="sortButton" class="submit_button">
+            <button id="sortButton" class="tri-option">
               Popularité
               <i
                 id="arrowIcon"
@@ -42,12 +43,8 @@
               ></i>
             </button>
             <div id="sortOptions" class="dropdown-content">
-              <button class="submit_button sort-option" data-sort="date">
-                Date
-              </button>
-              <button class="submit_button sort-option" data-sort="titre">
-                Titre
-              </button>
+              <button class="sort-option" data-sort="date">Date</button>
+              <button class="sort-option" data-sort="titre">Titre</button>
             </div>
           </div>
         </div>

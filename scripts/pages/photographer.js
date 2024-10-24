@@ -126,7 +126,7 @@ async function displayPhotographerMedia(photographerId, sortBy = "popularite") {
 
   // Boucle pour créer chaque média et ajouter les événements de clic
   sortedMedia.forEach((item, index) => {
-    const mediaItem = mediaFactory(item);
+    const mediaItem = mediaFactory(item, index);
     const mediaElement = mediaItem.getMediaDOM();
 
     // Ajoute un événement de clic pour ouvrir la Lightbox sur l'image ou la vidéo
@@ -140,7 +140,7 @@ async function displayPhotographerMedia(photographerId, sortBy = "popularite") {
 // -----------------------------------------------------------------------------------
 // Factory pour générer la structure HTML pour chaque média (image ou vidéo)
 // -----------------------------------------------------------------------------------
-function mediaFactory(data) {
+function mediaFactory(data, index) {
   const { title, image, video, likes } = data;
   let isLiked = false; // Variable pour suivre si l'utilisateur a liké
 
@@ -160,10 +160,22 @@ function mediaFactory(data) {
       const img = document.createElement("img");
       img.setAttribute("src", mediaSrc);
       img.setAttribute("alt", title);
+      img.setAttribute("tabindex", "0"); // Rendre l'image focusable
+      img.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          openLightbox(index);
+        }
+      });
       mediaElement.appendChild(img);
     } else if (video) {
       const videoElement = document.createElement("video");
       videoElement.setAttribute("src", mediaSrc);
+      videoElement.setAttribute("tabindex", "0"); // Rendre la vidéo focusable
+      videoElement.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          openLightbox(index);
+        }
+      });
       mediaElement.appendChild(videoElement);
     }
 
@@ -183,6 +195,18 @@ function mediaFactory(data) {
     const heartIcon = document.createElement("i");
     heartIcon.classList.add("fas", "fa-heart");
     heartIcon.setAttribute("aria-label", "likes");
+    heartIcon.setAttribute("tabindex", "0"); // Rendre le cœur focusable
+    heartIcon.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        const currentLikes = parseInt(likesElement.textContent);
+        likesElement.textContent = isLiked
+          ? currentLikes - 1
+          : currentLikes + 1;
+        isLiked = !isLiked; // Inverse l'état
+        heartIcon.classList.toggle("liked", isLiked); // Ajoute ou enlève la classe liked
+        updateTotalLikes(isLiked ? 1 : -1); // Met à jour le total des likes
+      }
+    });
 
     // Gère l'événement de clic pour liker ou unliker un média
     heartIcon.addEventListener("click", () => {
@@ -203,7 +227,9 @@ function mediaFactory(data) {
 
   return { getMediaDOM };
 }
-
+// -----------------------------------------------------------------------------------
+// ENCART POUR LES LIKES ET LE PRIX DU PHOTOGRAPHE
+// -----------------------------------------------------------------------------------
 // Met à jour le compteur de likes total en bas de page
 function updateTotalLikes(change) {
   totalLikes += change;
@@ -232,6 +258,7 @@ async function calculateTotalLikes(photographerId) {
     <span>${pricePerDay}€ / jour</span>
   `;
 }
+// -----------------------------------------------------------------------------------
 
 // Au chargement de la page, affiche les informations et les médias du photographe
 document.addEventListener("DOMContentLoaded", () => {
